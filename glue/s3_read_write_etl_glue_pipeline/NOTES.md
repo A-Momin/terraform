@@ -1,0 +1,1 @@
+-   [Automate S3 Data ETL Pipeline With AWS Glue to Read and Write to S3 Using Terraform](https://www.youtube.com/watch?v=rISNU8ZmG64)

@@ -1,0 +1,1 @@
+/Users/am/mydocs/Software_Development/noteshub/nts/notes_terraform.md
