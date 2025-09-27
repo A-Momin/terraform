@@ -1,0 +1,1 @@
+-   `$ aws iam delete-service-linked-role --role-name AWSServiceRoleForLakeFormationDataAccess`
