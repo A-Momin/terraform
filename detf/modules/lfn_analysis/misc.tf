@@ -1,7 +1,7 @@
 
 resource "null_resource" "prepare_lfn_zip_package" {
   provisioner "local-exec" {
-    command = <<EOT
+    command = <<-EOT
       rm -rf ${path.module}/package_lfn_analysis
       mkdir -p ${path.module}/package_lfn_analysis
       cp ${path.module}/python/code/lambda_handler.py ${path.module}/package_lfn_analysis/
@@ -25,7 +25,7 @@ data "archive_file" "lambda_zip" {
 
 resource "null_resource" "prepare_lfn_layer" {
   provisioner "local-exec" {
-    command = <<EOT
+    command = <<-EOT
       rm -rf ${path.module}/python/lfn_layer/python
       mkdir -p ${path.module}/python/lfn_layer/python
       cp /Users/am/mydocs/Software_Development/noteshub/utils/mylogger.py ${path.module}/python/lfn_layer/python/

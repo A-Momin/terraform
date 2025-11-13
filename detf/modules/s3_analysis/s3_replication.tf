@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 
 ########################################
 # Destination bucket for replication (replica region)
@@ -49,11 +51,6 @@ resource "aws_iam_role" "replication_role" {
   assume_role_policy = data.aws_iam_policy_document.replication_assume.json
 }
 
-resource "aws_iam_policy" "replication_policy" {
-  name   = "${var.project}-s3-replication-policy"
-  policy = data.aws_iam_policy_document.replication_policy.json
-}
-
 data "aws_iam_policy_document" "replication_policy" {
   statement {
     actions = [
@@ -88,6 +85,11 @@ data "aws_iam_policy_document" "replication_policy" {
     actions   = ["kms:Decrypt", "kms:Encrypt", "kms:GenerateDataKey"]
     resources = [aws_kms_key.s3.arn]
   }
+}
+
+resource "aws_iam_policy" "replication_policy" {
+  name   = "${var.project}-s3-replication-policy"
+  policy = data.aws_iam_policy_document.replication_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "replication_attach" {

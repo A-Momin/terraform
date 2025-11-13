@@ -92,6 +92,9 @@ resource "aws_s3_bucket_public_access_block" "primary_bkt_public_block" {
 # Ownership controls (Bucket owner enforced)
 ########################################
 resource "aws_s3_bucket_ownership_controls" "primary_bkt_owner" {
+  # The bucket owner will be the AWS account that created the S3 bucket, regardless of who uploads the objects.
+  # all Access Control Lists (ACLs) are disabled. Rely on modern IAM policies and Bucket Policies instead of complex ACLs.
+
   bucket = aws_s3_bucket.primary_bkt.id
 
   rule {
@@ -212,8 +215,6 @@ resource "aws_s3_bucket_analytics_configuration" "primary_bkt_analytics" {
     }
   }
 }
-
-data "aws_caller_identity" "current" {}
 
 ########################################
 # S3 Access Point (useful to grant access to shared datasets, mount via EFS Access Point style)

@@ -39,6 +39,7 @@ resource "aws_iam_group" "groups" {
 # ----------------------------
 locals {
   user_group_map = {
+    AMShah  = ["admins"]
     Clinton = ["admins"]
     Joe     = ["developers"]
     Trump   = ["developers"]

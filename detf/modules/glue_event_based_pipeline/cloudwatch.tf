@@ -1,6 +1,7 @@
 resource "aws_cloudwatch_event_rule" "customar_crawler_status_rule" {
   name        = var.S3_CUSTOMER_CRAWLER_RULE_NAME
   description = "Triggers when the customer crawler completes"
+
   event_pattern = jsonencode({
     source      = ["aws.glue", "my-custom-source"]
     detail-type = ["Glue Crawler State Change"],
@@ -11,7 +12,7 @@ resource "aws_cloudwatch_event_rule" "customar_crawler_status_rule" {
   })
 
   tags = {
-    Project = "glue-event-based-pipeline"
+    Project = "${var.PROJECT}-crawler-even-pattern"
   }
 }
 
@@ -22,7 +23,7 @@ resource "aws_cloudwatch_event_target" "trigger_customer_processing_lfn" {
     "--JOB_NAME"           = var.CUSTOMER_PROCESSING_JOB_NAME
     "--S3_BUCKET_DATALAKE" = var.datalake_bkt.bucket
     "--CATALOG_DB_NAME"    = var.glue_catalog_databases["gcdb-bronze"].name
-    "--TABLE_NAME"         = "${local.bronze}_customers"
+    "--TABLE_NAME"         = "bronze_customers"
     "--TARGET"             = "s3://${var.datalake_bkt.bucket}/silver/customers/"
   })
 }
@@ -38,6 +39,10 @@ resource "aws_cloudwatch_event_rule" "customer_processing_job_status_rule" {
       jobName = [var.CUSTOMER_PROCESSING_JOB_NAME]
     }
   })
+
+  tags = {
+    Project = "${var.PROJECT}-job-even-pattern"
+  }
 }
 
 resource "aws_cloudwatch_event_target" "notify_sns_topic" {
@@ -50,7 +55,7 @@ resource "aws_cloudwatch_log_group" "s3_customer_crawler_triggerer_lg" {
   retention_in_days = 1
 
   tags = {
-    Project = "glue-event-based-pipeline"
+    Project = "${var.PROJECT}-s3-customer-crawler-trigger"
   }
 }
 
@@ -59,16 +64,23 @@ resource "aws_cloudwatch_log_group" "glue_job_starter_lg" {
   retention_in_days = 1
 
   tags = {
-    Project = "glue-event-based-pipeline"
+    Project = "${var.PROJECT}-glue-job-starter"
   }
 }
 
 resource "aws_cloudwatch_log_group" "glue_continuous_log_group" {
   name              = "/aws-glue/jobs/continuous"
   retention_in_days = 30
+  tags = {
+    Project = "${var.PROJECT}-glue-continuous"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "glue_metrics_log_group" {
   name              = "/aws-glue/jobs/metrics"
   retention_in_days = 30
+
+  tags = {
+    Project = "${var.PROJECT}-glue-metrics"
+  }
 }

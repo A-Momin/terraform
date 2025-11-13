@@ -21,8 +21,8 @@ resource "aws_lambda_function" "s3_customer_crawler_triggerer" {
 }
 
 resource "aws_lambda_permission" "allow_s3_to_invoke_lambda" {
-  function_name = aws_lambda_function.s3_customer_crawler_triggerer.function_name
   statement_id  = "${aws_lambda_function.s3_customer_crawler_triggerer.function_name}-permission"
+  function_name = aws_lambda_function.s3_customer_crawler_triggerer.function_name
   source_arn    = var.datalake_bkt.arn
   principal     = "s3.amazonaws.com"
   action        = "lambda:InvokeFunction"

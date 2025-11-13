@@ -1,3 +1,8 @@
+variable "project" {
+  type        = string
+  description = "Project Name"
+  default     = "lfn-analysis"
+}
 variable "cw_events" {
   description = "AWS CloudWatch Rules"
   type        = map(string)

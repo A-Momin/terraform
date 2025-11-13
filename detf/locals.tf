@@ -23,10 +23,11 @@ locals {
     "athena-outputs/"
   ]
   glue_assets_bkt_prefixes = [
+    "glue_scripts/",
+    "lfn_deployment_pkg/",
     "temporary/",
     "sparkHistoryLogs/",
     "libraries/",
-    "glue_scripts/",
     "misc/"
   ]
 }

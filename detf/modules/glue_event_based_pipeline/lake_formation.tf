@@ -1,20 +1,9 @@
 ## Only a Lake Formation admin (set in data_lake_settings.admins) can grant/revoke LF permissions.
-## If your Terraform execution role (the one running `terraform apply`) is not an LF admin, you’ll get this error.
+## If your Terraform execution role (the one running `terraform apply`) is not an LF admin, you’ll get error.
 
 resource "aws_lakeformation_data_lake_settings" "lftn_setting" {
-  admins = [var.lftn_admin_user.arn]
-
-  #   create_database_default_permissions {
-  #     permissions = ["ALL"]
-  #     principal   = var.lftn_admin_user.arn
-  #   }
-
-  #   create_table_default_permissions {
-  #     permissions = ["ALL"]
-  #     principal   = var.lftn_admin_user.arn
-  #   }
-
-  trusted_resource_owners = []
+  admins                  = [var.lftn_admin_user.arn]
+  trusted_resource_owners = [] # The trusted account can create Lake Formation resources, such as databases and tables, within your account.
 }
 
 resource "aws_lakeformation_resource" "datalake_registration" {

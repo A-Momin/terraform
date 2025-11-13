@@ -1,22 +1,21 @@
 data "aws_iam_policy_document" "assume_role" {
   statement {
-    effect = "Allow"
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
 
     principals {
       type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
     }
-
-    actions = ["sts:AssumeRole"]
   }
 }
 resource "aws_iam_role" "lfn_analysis_role" {
-  name               = "lfn_analysis_role"
+  name               = "lfn-analysis-role"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
 resource "aws_iam_role_policy" "lfn_analysis_policies" {
-  name = "lfn_analysis_policies"
+  name = "lfn-analysis-policies"
   role = aws_iam_role.lfn_analysis_role.id
 
   # Terraform's "jsonencode" function converts a
@@ -84,6 +83,80 @@ resource "aws_iam_role_policy" "lfn_analysis_policies" {
   })
 }
 
+# data "aws_iam_policy_document" "example_policy" {
+#   version = "2012-10-17"
+
+#   statement {
+#     sid = "SQSFullAccess" # Optional: Adding SIDs for clarity
+#     actions = [
+#       "sqs:*",
+#     ]
+#     effect    = "Allow"
+#     resources = ["*"]
+#   }
+
+#   statement {
+#     sid = "SESFullAccess"
+#     actions = [
+#       "ses:*",
+#     ]
+#     effect    = "Allow"
+#     resources = ["*"]
+#   }
+
+#   statement {
+#     sid = "S3AndS3ObjectLambdaAccess"
+#     actions = [
+#       "s3:*",
+#       "s3-object-lambda:*",
+#     ]
+#     effect    = "Allow"
+#     resources = ["*"]
+#   }
+
+#   statement {
+#     sid = "CloudWatchLogsAccess"
+#     actions = [
+#       "logs:*",
+#     ]
+#     effect    = "Allow"
+#     resources = ["*"]
+#   }
+
+#   statement {
+#     sid = "EFSClientAccess"
+#     actions = [
+#       "elasticfilesystem:ClientMount",
+#       "elasticfilesystem:ClientWrite",
+#       # Note: The original JSON had 'ClientWrite' listed twice; keeping both for fidelity, though redundant.
+#       "elasticfilesystem:ClientWrite",
+#     ]
+#     effect    = "Allow"
+#     resources = ["*"]
+#   }
+
+#   statement {
+#     sid = "EC2NetworkInterfaceManagement"
+#     actions = [
+#       "ec2:CreateNetworkInterface",
+#       "ec2:DescribeNetworkInterfaces",
+#       "ec2:DeleteNetworkInterface",
+#       # The commented-out actions (DescribeSubnets, Assign/UnassignPrivateIpAddresses) are omitted as they were commented out in the source.
+#     ]
+#     effect    = "Allow"
+#     resources = ["*"]
+#   }
+
+#   statement {
+#     sid = "SQSAndSNSCombinedAccess"
+#     actions = [
+#       "sqs:*",
+#       "sns:*",
+#     ]
+#     effect    = "Allow"
+#     resources = ["*"]
+#   }
+# }
 
 ##################################################
 # Security Group for EFS

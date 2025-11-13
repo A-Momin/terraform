@@ -3,8 +3,7 @@ resource "aws_efs_file_system" "lfn_analysis_file_sys" {
   encrypted = true
 
   tags = {
-    Name    = "lambda-efs"
-    Project = "Lambda Analysis"
+    Project = "${var.project}-efs"
   }
 }
 
@@ -20,6 +19,7 @@ resource "aws_efs_mount_target" "lfn_analysis_efs_mnt_target" {
   security_groups = [aws_security_group.efs_sg.id]
 
   #   depends_on = [aws_subnet.lfn_analysis_subnets]
+
 }
 
 # Access point for Lambda
@@ -42,6 +42,9 @@ resource "aws_efs_access_point" "lfn_analysis_file_access_point" {
 
   depends_on = [aws_efs_mount_target.lfn_analysis_efs_mnt_target]
 
+  tags = {
+    Project = "${var.project}-efs-ap"
+  }
 }
 
 

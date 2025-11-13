@@ -1,3 +1,32 @@
+# data "aws_iam_policy_document" "assume_role" {
+#   statement {
+#     actions = ["sts:AssumeRole"]
+#     effect  = "Allow"
+
+#     principals {
+#       type        = "Service"
+#       identifiers = ["glue.amazonaws.com"]
+#     }
+#   }
+# }
+
+resource "aws_iam_role" "glue_role" {
+  name = var.GLUE_ROLE_NAME
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = ["glue.amazonaws.com"]
+        }
+      }
+    ]
+  })
+}
+
 # Additional IAM permissions for Glue Data Quality
 resource "aws_iam_policy" "glue_data_quality_policy" {
   name        = "glue-data-quality-policy"
@@ -55,8 +84,8 @@ resource "aws_iam_role_policy_attachment" "glue_data_quality_policy_attachment" 
   policy_arn = aws_iam_policy.glue_data_quality_policy.arn
 }
 
-###############################
-###############################
+###############################################################################
+###############################################################################
 
 resource "aws_iam_role" "lfn_role" {
   name = var.LFN_ROLE_NAME
@@ -78,39 +107,19 @@ resource "aws_iam_role_policy" "lfn_role_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
         Action   = ["s3:*"]
-        Resource = "*"
-      },
-      {
         Effect   = "Allow"
+        Resource = "*"
+      },
+      {
         Action   = ["log:*"]
+        Effect   = "Allow"
         Resource = "*"
       },
 
     ]
   })
 }
-
-resource "aws_iam_role" "glue_role" {
-  name = var.GLUE_ROLE_NAME
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          Service = [
-            "glue.amazonaws.com"
-          ]
-        }
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
 
 resource "aws_iam_role_policy" "glue_role_policy" {
   role = aws_iam_role.glue_role.name

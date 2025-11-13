@@ -32,9 +32,9 @@ Create a `demo-sqls.md` with these examples to run against Redshift via `psql` (
 
     ```sql
     CREATE TABLE public.users (
-    id INT,
-    name VARCHAR(100),
-    email VARCHAR(255)
+        id INT,
+        name VARCHAR(100),
+        email VARCHAR(255)
     );
 
     INSERT INTO public.users VALUES (1, 'Alice', 'alice@example.com');
@@ -43,30 +43,7 @@ Create a `demo-sqls.md` with these examples to run against Redshift via `psql` (
     SELECT * FROM public.users;
     ```
 
-3. **COPY from S3 (inline example)**
-
-    ```sql
-    -- Put a CSV file into s3://<staging-bucket>/data/users.csv
-    -- The Redshift IAM role must be attached to the cluster (we did this)
-    COPY public.users
-    FROM 's3://<staging-bucket>/data/users.csv'
-    IAM_ROLE '<redshift_role_arn>'
-    CSV
-    IGNOREHEADER 1;
-    ```
-
-4. **UNLOAD to S3**
-
-    ```sql
-    UNLOAD ('select * from public.users')
-    TO 's3://<staging-bucket>/unload/users_'
-    IAM_ROLE '<redshift_role_arn>'
-    ALLOWOVERWRITE
-    PARALLEL OFF
-    CSV;
-    ```
-
-5. **Create external schema (Spectrum) using Glue Data Catalog**
+3. **Create external schema (Spectrum) using Glue Data Catalog**
 
     ```sql
     -- You need a Glue catalog database created and tables crawled or defined.
@@ -80,14 +57,50 @@ Create a `demo-sqls.md` with these examples to run against Redshift via `psql` (
     SELECT * FROM spectrum_schema.some_table LIMIT 10;
     ```
 
-6. **Snapshot & restore (Terraform side / AWS console)**
+4. **COPY from S3 (inline example)**
+
+    ```sql
+    -- Put a CSV file into s3://<staging-bucket>/data/users.csv
+    -- The Redshift IAM role must be attached to the cluster (we did this)
+    COPY public.users
+    FROM 's3://<staging-bucket>/data/users.csv'
+    IAM_ROLE '<redshift_role_arn>'
+    CSV
+    IGNOREHEADER 1;
+    ```
+
+5. **Creating the Auto-Copy Job**: You create the auto-copy job using a modified `COPY` command in your Redshift query editor. Here is the general syntax for the command:
+
+    ```sql
+    COPY <table-name>
+    FROM 's3://<s3-bucket-name>/<prefix>/'
+    IAM_ROLE 'arn:aws:iam::<your-account-id>:role/<your-iam-role>'
+    [optional-copy-parameters]
+    JOB CREATE <job-name>
+    AUTO ON;
+    ```
+
+    - The key to enabling automatic ingestion is the `JOB CREATE` and `AUTO ON` parameters.
+
+6. **UNLOAD to S3**
+
+    ```sql
+    UNLOAD ('select * from public.users')
+    TO 's3://<staging-bucket>/unload/users_'
+    IAM_ROLE '<redshift_role_arn>'
+    ALLOWOVERWRITE
+    PARALLEL OFF
+    CSV;
+    ```
+
+7. **Snapshot & restore (Terraform side / AWS console)**
 
     - Automated snapshot retention is set via Terraform.
     - Manual snapshots can be taken in console or AWS CLI.
 
-7. **Redshift Parameter Group (example)**
+8. **Redshift Parameter Group (example)**
 
-    - We set require_ssl = true in param group; you can query parameters in console.
+    - We set `require_ssl = true` in param group; you can query parameters in console.
 
 -   **How to demonstrate features & component mapping**
 

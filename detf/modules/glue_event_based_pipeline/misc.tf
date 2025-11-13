@@ -1,6 +1,6 @@
 resource "null_resource" "prepare_lfn_deployment_package" {
   provisioner "local-exec" {
-    command = <<EOT
+    command = <<-EOT
         rm -fr ${path.module}/lambdas/lfn_deployment_package
         mkdir -p ${path.module}/lambdas/lfn_deployment_package
         cp ${path.module}/lambdas/lfn1/*.py ${path.module}/lambdas/lfn_deployment_package/
@@ -25,7 +25,7 @@ resource "null_resource" "prepare_glue_external_py_lib" {
   count = var.run_prepare_glue_external_py_lib ? 1 : 0
 
   provisioner "local-exec" {
-    command = <<EOT
+    command = <<-EOT
         rm -fr ${path.module}/python_libraries
         mkdir -p ${path.module}/python_libraries
         cp /Users/am/mydocs/Software_Development/noteshub/utils/mylogger.py ${path.module}/python_libraries/

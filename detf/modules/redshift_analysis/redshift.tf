@@ -26,7 +26,7 @@ resource "aws_security_group" "redshift_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "Allow psql/SQL client from anywhere for demo (restrict in prod!)"
+    description = "Allow psql/SQL client from anywhere (restrict in prod!)"
     from_port   = 5439
     to_port     = 5439
     protocol    = "tcp"

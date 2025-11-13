@@ -1,0 +1,2 @@
+-   [Deploy Django app on AWS EC2 with Auto Scaling Group, Load Balancer, Route53, and SSL](https://www.youtube.com/watch?v=GVHZwqJvJiw)
+-   [Deploy Django Application on AWS EC2 with PostgreSQL and S3 Storage](https://www.youtube.com/watch?v=LaoYcQsPyD8)

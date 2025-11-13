@@ -68,3 +68,22 @@ variable "iam_groups" {
     "developers",
   ]
 }
+
+variable "django_secret_key" {
+  description = ""
+  type        = string
+  sensitive   = true # Mark as sensitive to prevent output in logs/state
+}
+
+variable "django_stripe_secret_key" {
+  description = ""
+  type        = string
+  sensitive   = true # Mark as sensitive to prevent output in logs/state
+}
+
+variable "django_stripe_endpoint_secret" {
+  description = ""
+  type        = string
+  sensitive   = true # Mark as sensitive to prevent output in logs/state
+}
+

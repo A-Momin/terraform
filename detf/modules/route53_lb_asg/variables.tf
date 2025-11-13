@@ -7,7 +7,6 @@ variable "project" {
 variable "r53_hosted_zone" {
   description = "The domain name of the Route53 hosted zone"
   type        = any
-  #   default     = "harnesstechtx.com"
 }
 
 variable "subject_alternative_names" {

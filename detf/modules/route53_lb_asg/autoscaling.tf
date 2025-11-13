@@ -50,18 +50,18 @@ resource "aws_launch_template" "lt" {
 
 resource "aws_autoscaling_group" "asg" {
   name                = "${var.project}-asg"
-  max_size            = 4
-  min_size            = 2
-  desired_capacity    = 2
   vpc_zone_identifier = [for k, v in var.private_subnets : v.id if strcontains(k, "private")]
-  #   vpc_zone_identifier = [for k, v in var.public_subnets : v.id if strcontains(k, "public")]
+  target_group_arns   = [aws_lb_target_group.tg.arn]
+
+  max_size         = 4
+  min_size         = 2
+  desired_capacity = 2
 
   launch_template {
     id      = aws_launch_template.lt.id
     version = "$Latest"
   }
 
-  target_group_arns = [aws_lb_target_group.tg.arn]
 
   tag {
     key                 = "Project"

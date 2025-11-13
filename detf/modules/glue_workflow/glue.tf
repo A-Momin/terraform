@@ -1,41 +1,51 @@
-# in progress (not yet tested)
-resource "aws_glue_data_quality_ruleset" "customer_dq_eval_ruleset" {
-  name        = "customer-data-quality-ruleset"
-  description = "Data quality ruleset for customer data"
-
-  target_table {
-    database_name = aws_glue_catalog_database.glue_catalog_db.name
-    table_name    = "customers"
+#######################
+# Glue Jobs
+#######################
+resource "aws_glue_job" "job1" {
+  name              = "${var.prefix}-glue-job-01"
+  role_arn          = aws_iam_role.glue_service_role.arn
+  max_retries       = 0
+  glue_version      = "4.0"
+  number_of_workers = 2
+  worker_type       = "G.1X" # Standard' | 'G.1X' | 'G.2X'
+  command {
+    name            = "glueetl"
+    python_version  = "3"
+    script_location = "s3://${var.glue_assets_bkt.bucket}/glue_scripts/job1_etl.py"
   }
 
-  ruleset = <<EOT
-    Rules = [
-    ColumnExists "CUSTOMERID",
-    ColumnExists "CUSTOMERNAME",
-    ColumnExists "EMAIL",
-    IsComplete "CUSTOMERID",
-    IsUnique "CUSTOMERID",
-    IsComplete "EMAIL"
-    ]
-  EOT
-  tags = {
-    "Project" = "glue-workflow"
+  default_arguments = {
+    "--TempDir"                          = "s3://${var.glue_assets_bkt.bucket}/temporary",
+    "--library-path"                     = "s3://${var.glue_assets_bkt.bucket}/libraries",             # Path to external libraries (JARs, compiled libraries, JDBC drivers)
+    "--extra-py-files"                   = "s3://${var.glue_assets_bkt.bucket}/libraries/package.zip", # Python modules/packages (Python .zip)
+    "--spark-event-logs-path"            = "s3://${var.glue_assets_bkt.bucket}/sparkHistoryLogs/",
+    "--job-bookmark-option"              = "job-bookmark-enable",
+    "--job-language"                     = "python",
+    "--enable-continuous-cloudwatch-log" = "true",
+    # "--continuous-log-group"             = aws_cloudwatch_log_group.glue_continuous_log_group.name # Continuous logging is often enabled alongside metrics
+    "--enable-metrics" = "true", # AWS Glue can also publish detailed metrics about your job's performance to CloudWatch. These metrics are published to a separate log group.
+    # "--enable-metrics"                   = ""
+    # "--enable-spark-ui"                  = ""
+
+    "--DATALAKE_BKT" = var.datalake_bkt.bucket
+    "--INPUT_KEY"    = "bronze/sales/sales_tiny.csv"
+    "--OUTPUT_KEY"   = "silver/sales/processed_sales_tiny.csv"
+
+    # When a Glue Job runs as part of a workflow, AWS automatically injects the `WORKFLOW_RUN_ID` and `WORKFLOW_NAME` as special system arguments (prefixed with --) which you must define in the default_arguments map, even though the value {context.workflow_run_id} is a placeholder that will be replaced at runtime.
+    "--WORKFLOW_RUN_ID" = "{context.workflow_run_id}"
+    "--WORKFLOW_NAME"   = "{context.workflow_name}"
   }
+
 }
 
-resource "aws_glue_job" "customer_dq_eval_job" {
-  name              = var.CUSTOMER_DQ_EVAL_JOB_NAME
-  role_arn          = aws_iam_role.glue_role.arn
-  max_retries       = 0
-  glue_version      = "5.0"
-  number_of_workers = 2
-  worker_type       = "G.1X"
-  #   timeout           = 5 # in 
+resource "aws_glue_job" "job2" {
+  name     = "${var.prefix}-glue-job-02"
+  role_arn = aws_iam_role.glue_service_role.arn
 
   command {
     name            = "glueetl"
-    script_location = "s3://${var.glue_assets_bkt.bucket}/glue_scripts/customer_dq_eval.py"
     python_version  = "3"
+    script_location = "s3://${var.glue_assets_bkt.bucket}/glue_scripts/job2_etl.py"
   }
 
   default_arguments = {
@@ -46,78 +56,77 @@ resource "aws_glue_job" "customer_dq_eval_job" {
     "--job-bookmark-option"              = "job-bookmark-enable",
     "--job-language"                     = "python",
     "--enable-continuous-cloudwatch-log" = "true"
-    #----------------------------------------------------------------------
-    # Data Quality Evaluation Job Specific Arguments
-    #----------------------------------------------------------------------
-    # "--JOB_NAME"                = "${var.CUSTOMER_DQ_EVAL_JOB_NAME}"
-    # "--CATALOG_DB_NAME"         = "${aws_glue_catalog_database.glue_catalog_db.name}"
-    # "--TABLE_NAME"              = "customers"
-    # "--data_quality_ruleset_id" = aws_glue_data_quality_ruleset.customer_dq_eval_ruleset.id
-    # "--dq_results_path" = "s3://${var.datalake_bkt.bucket}/DQE-Results/customers/"
+    # "--continuous-log-group"             = aws_cloudwatch_log_group.glue_continuous_log_group.name # Continuous logging is often enabled alongside metrics
+    "--enable-metrics" = "true" # AWS Glue can also publish detailed metrics about your job's performance to CloudWatch. These metrics are published to a separate log group.
+    # "--enable-metrics"                   = ""
+    # "--enable-spark-ui"                  = ""
 
+    "--DATALAKE_BKT" = var.datalake_bkt.bucket
+    "--OUTPUT_KEY"   = "gold/sales/curated_sales_tiny.csv"
+
+
+    # When a Glue Job runs as part of a workflow, AWS automatically injects the `WORKFLOW_RUN_ID` and `WORKFLOW_NAME` as special system arguments (prefixed with --) which you must define in the default_arguments map, even though the value {context.workflow_run_id} is a placeholder that will be replaced at runtime.
+    "--WORKFLOW_RUN_ID" = "{context.workflow_run_id}"
+    "--WORKFLOW_NAME"   = "{context.workflow_name}"
   }
 
-  tags = {
-    "Project" = "glue-workflow"
-  }
+  max_retries       = 0
+  glue_version      = "4.0"
+  number_of_workers = 2
+  worker_type       = "G.1X" # Standard' | 'G.1X' | 'G.2X'
 }
 
-# resource "aws_glue_trigger" "customer_dq_eval_job_trigger" {
-#   name = "dq-eval-customer-job-trigger"
-#   type = "CONDITIONAL"
+resource "aws_s3_object" "upload_glue_job_script" {
 
-#   actions {
-#     job_name = aws_glue_job.customer_dq_eval_job.name
-#   }
+  for_each = fileset("${path.module}/glue_scripts", "**")
 
-#   predicate {
-#     conditions {
-#       crawler_name = aws_glue_crawler.s3_customer_crawler.name
-#       crawl_state  = "SUCCEEDED"
-#     }
-#   }
+  bucket = var.glue_assets_bkt.bucket
+  key    = "/glue_scripts/${each.value}" # prefix in bucket
+  source = "${path.module}/glue_scripts/${each.value}"
+  etag   = filemd5("${path.module}/glue_scripts/${each.value}")
+}
 
-#   tags = {
-#     "Project" = "glue-workflow"
-#   }
-# }
 
-# resource "aws_glue_crawler" "customer_dq_eval_crawler" {
-#   name          = "customer-dq-eval-crawler"
-#   role          = aws_iam_role.glue_role.arn
-#   database_name = aws_glue_catalog_database.glue_catalog_db.name
+#######################
+# Glue Workflow
+#######################
+resource "aws_glue_workflow" "glue_workflow" {
+  name        = "${var.prefix}-glue-workflow"
+  description = "Demo workflow with two jobs chained via triggers"
+}
 
-#   s3_target {
-#     path = "s3://${var.datalake_bkt.bucket}/DQ-Evaluations/customers_dqe/"
-#   }
+#######################
+# Glue Triggers: job1 runs when workflow starts; job2 runs when job1 succeeds
+#######################
+# Trigger: ON_DEMAND (will be invoked by workflow start)
+resource "aws_glue_trigger" "trigger_job1" {
+  name = "${var.prefix}-trigger-job1"
+  type = "ON_DEMAND"
 
-#   #   recrawl_policy = "" # (Optional) A policy that specifies whether to crawl the entire dataset again, or to crawl only folders that were added since the last crawler run.
-#   #   table_prefix = "" # (Optional) The table prefix used for catalog tables that are created.
-#   #   schedule = "cron(0 12 * * ? *)" # optional: run daily
+  actions {
+    job_name = aws_glue_job.job1.name
+  }
 
-#   tags = {
-#     "Project" = "glue-workflow"
-#   }
+  workflow_name = aws_glue_workflow.glue_workflow.name
+}
 
-# }
+# Trigger: CONDITIONAL, starts job2 when job1 SUCCESS
+resource "aws_glue_trigger" "trigger_after_job1" {
+  name = "${var.prefix}-trigger-job2"
+  type = "CONDITIONAL"
 
-# resource "aws_glue_trigger" "customer_dq_eval_crawler_trigger" {
+  actions {
+    job_name = aws_glue_job.job2.name
+  }
 
-#   name = "customer-dq-eval-crawler-trigger"
-#   type = "CONDITIONAL"
+  predicate {
+    conditions {
+      logical_operator = "EQUALS"
+      job_name         = aws_glue_job.job1.name
+      state            = "SUCCEEDED"
+    }
+  }
 
-#   actions {
-#     crawler_name = aws_glue_crawler.customer_dq_eval_crawler.name
-#   }
+  workflow_name = aws_glue_workflow.glue_workflow.name
+}
 
-#   predicate {
-#     conditions {
-#       job_name = aws_glue_job.customer_dq_eval_job.name
-#       state    = "SUCCEEDED"
-#     }
-#   }
-
-#   tags = {
-#     "Project" = "glue-workflow"
-#   }
-# }
