@@ -1,6 +1,6 @@
-resource "aws_iam_user" "lftn_user" {
-  name = "AMShah"
-}
+# resource "aws_iam_user" "lftn_user" {
+#   name = "AMShah"
+# }
 
 # ----------------------------
 # 2. Create IAM Users

@@ -103,6 +103,7 @@ resource "aws_instance" "ec2_dev_environment" {
 
     # Use the default version ($Latest or $Default are common, but using $Latest is usually preferred)
     version = "$Latest"
+    # version = "$Default"
   }
 
   # Optional: Add tags for identification and organization
@@ -179,7 +180,7 @@ resource "null_resource" "ec2_dev_bash_config" {
         scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${var.key_name}.pem ${var.bash_config_scripts_location}/.git-aliases.bash ${var.ec2_username}@${aws_eip.ec2_dev_eip.public_ip}:/home/${var.ec2_username}/.git-aliases.bash
         scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${var.key_name}.pem ${var.bash_config_scripts_location}/.git-completion.bash ${var.ec2_username}@${aws_eip.ec2_dev_eip.public_ip}:/home/${var.ec2_username}/.git-completion.bash
         scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${var.key_name}.pem ${var.bash_config_scripts_location}/.git-prompt.sh ${var.ec2_username}@${aws_eip.ec2_dev_eip.public_ip}:/home/${var.ec2_username}/.git-prompt.sh
-        scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${var.key_name}.pem ${var.bash_config_scripts_location}/.vimrc ${var.ec2_username}@${aws_eip.ec2_dev_eip.public_ip}:/home/${var.ec2_username}/.vimrc
+        # scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${var.key_name}.pem ${var.bash_config_scripts_location}/.vimrc ${var.ec2_username}@${aws_eip.ec2_dev_eip.public_ip}:/home/${var.ec2_username}/.vimrc
         scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${var.key_name}.pem ${var.bash_config_scripts_location}/.bash_utils.sh ${var.ec2_username}@${aws_eip.ec2_dev_eip.public_ip}:/home/${var.ec2_username}/.bash_utils.sh
         scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${var.key_name}.pem ${var.bash_config_scripts_location}/.secrets.bash ${var.ec2_username}@${aws_eip.ec2_dev_eip.public_ip}:/home/${var.ec2_username}/.secrets.bash
         scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/${var.key_name}.pem ${var.bash_config_scripts_location}/automate_installations.sh ${var.ec2_username}@${aws_eip.ec2_dev_eip.public_ip}:/home/${var.ec2_username}/.automate_installations.sh

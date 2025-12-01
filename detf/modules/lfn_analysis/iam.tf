@@ -24,16 +24,12 @@ resource "aws_iam_role_policy" "lfn_analysis_policies" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = [
-          "sqs:*"
-        ]
+        Action = ["sqs:*"]
         Effect   = "Allow"
         Resource = "*"
       },
       {
-        Action = [
-          "ses:*"
-        ]
+        Action = ["ses:*"]
         Effect   = "Allow"
         Resource = "*"
       },

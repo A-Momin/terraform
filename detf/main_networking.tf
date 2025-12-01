@@ -69,7 +69,7 @@ resource "aws_nat_gateway" "detf_vpc_ngw1" {
 resource "aws_vpc_endpoint" "s3_endpoint" {
   vpc_id            = aws_vpc.detf_vpc.id
   service_name      = "com.amazonaws.us-east-1.s3"
-  route_table_ids   = [aws_route_table.detf_vpc_rt_public.id]
+  route_table_ids   = [aws_route_table.detf_vpc_rt_public.id, aws_route_table.detf_vpc_rt_private.id]
   vpc_endpoint_type = "Gateway"
   tags = {
     Project = var.project
@@ -129,3 +129,8 @@ resource "aws_route_table_association" "private_rtbl_association" {
   route_table_id = aws_route_table.detf_vpc_rt_private.id
   subnet_id      = aws_subnet.private_subnets[each.key].id
 }
+
+# resource "aws_default_security_group" "default_sg" {
+#   vpc_id = aws_vpc.example.id
+# }
+

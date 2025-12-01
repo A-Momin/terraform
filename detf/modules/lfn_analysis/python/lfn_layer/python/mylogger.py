@@ -34,7 +34,7 @@ class CustomLogger:
 
     def __init__(self, logger=None, log_dir: Optional[str] = None):
         self.log_dir = log_dir
-        self.logger = logger or initialize_logger(__name__, logfile={})
+        self.logger = logger or initialize_logger(__name__)
 
     def log(self):
         if self.logger: return self.logger
@@ -55,16 +55,16 @@ class CustomLogger:
             return message
 
     def info(self, message, details: Optional[Union[str, dict]] = None, color: Optional[str] = None):
-        self.logger.info(self.get_message(message, details, color), stacklevel=2)
+        self.log().info(self.get_message(message, details, color), stacklevel=5)
 
     def debug(self, message, details: Optional[Union[str, dict]] = None, color: Optional[str] = None):
-        self.logger.debug(self.get_message(message, details, color), stacklevel=2)
+        self.log().debug(self.get_message(message, details, color), stacklevel=5)
 
     def warning(self, message, details: Optional[Union[str, dict]] = None, color: Optional[str] = None):
-        self.logger.warning(self.get_message(message, details, color), stacklevel=2)
+        self.log().warning(self.get_message(message, details, color), stacklevel=5)
 
     def error(self, message, details: Optional[Union[str, dict]] = None, color: Optional[str] = None):
-        self.logger.error(self.get_message(message, details, color), stacklevel=2)
+        self.log().error(self.get_message(message, details, color), stacklevel=5)
 
     def full_output(self, values: dict) -> None:
         with open("output.json", "w", encoding="utf-8") as output_file:

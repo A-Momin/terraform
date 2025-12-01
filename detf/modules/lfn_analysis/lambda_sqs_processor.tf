@@ -69,7 +69,7 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
   batch_size       = 10
   enabled          = true
   # 👉 Together, they define the retry policy: Lambda retries until either retry attempts are exhausted OR record age expires, whichever comes first.
-  maximum_retry_attempts        = 0  # How many times to retry failed batches
+  # maximum_retry_attempts        = 0  # How many times to retry failed batches
   maximum_record_age_in_seconds = 60 # Maximum age of a record that Lambda sends to a function for processing; default is 60 seconds
 }
 

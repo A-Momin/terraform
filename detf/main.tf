@@ -4,18 +4,18 @@ module "ec2_dev_environment" {
   subnet_id = element([for k, v in aws_subnet.public_subnets : v.id if strcontains(k, "public")], 0)
 }
 
-module "ecs_analysis" {
-  source = "./modules/ecs_analysis"
+# module "ecs_analysis" {
+#   source = "./modules/ecs_analysis"
 
-  django_secret_key             = var.django_secret_key
-  django_stripe_secret_key      = var.django_stripe_secret_key
-  django_stripe_endpoint_secret = var.django_stripe_endpoint_secret
+#   django_secret_key             = var.django_secret_key
+#   django_stripe_secret_key      = var.django_stripe_secret_key
+#   django_stripe_endpoint_secret = var.django_stripe_endpoint_secret
 
-  r53_hosted_zone = aws_route53_zone.harnesstech_public_zone
-  vpc             = aws_vpc.detf_vpc
-  public_subnets  = aws_subnet.public_subnets
-  private_subnets = aws_subnet.private_subnets
-}
+#   vpc_id             = aws_vpc.detf_vpc.id
+#   vpc_cidr_block = var.VPC_CIDR
+#   public_subnets  = toset([for k,v in aws_subnet.public_subnets: v.id])
+#   private_subnets = toset([for k,v in aws_subnet.private_subnets: v.id])
+# }
 
 # module "lfn_analysis" {
 #   source  = "./modules/lfn_analysis"
